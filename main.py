@@ -9,7 +9,7 @@ import jwt
 from fastapi import Depends, FastAPI
 from decouple import Config,RepositoryEnv
 import os
-
+from model import User
 config = Config(RepositoryEnv(".env"))
 MONGO_URI = config('MONGO_URI')
 
@@ -20,19 +20,9 @@ async def root():
     return {"message": "FAST api chat app"}
 
 
-
 client = AsyncIOMotorClient(MONGO_URI)
 db = client.fastapi_mongo
 
-
-class User(BaseModel):
-    id: str = Field(default=None)
-    username: str = Field(...)
-    password: str = Field(...)
-    created_at: datetime = Field(default=datetime.utcnow())
-    updated_at: datetime = Field(default=datetime.utcnow())
-
-    
 
 
 async def get_user(username: str):
