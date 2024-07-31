@@ -17,3 +17,8 @@ from typing import Dict
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
+from langchain.cache import InMemoryCache
+from langchain.globals import set_llm_cache
+
+cache_instance=InMemoryCache()
+set_llm_cache(cache_instance)
