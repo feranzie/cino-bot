@@ -9,3 +9,13 @@ class User(BaseModel):
     updated_at: datetime = Field(default=datetime.utcnow())
 
     
+class ChatSchema(BaseModel):
+    query:str
+
+    class Config:
+        json_schema_extra ={
+            "example":{
+                "query":"hi"
+            
+        }
+        }
