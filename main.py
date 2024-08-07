@@ -118,12 +118,11 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-app.include_router(chat.router)
+#app.include_router(chat.router)
 app.include_router(
     chat.router,
     prefix="/api",
     tags=["api"],
     dependencies=[Depends(get_current_user)],
 )
-# @app.post("/chat")
-# async def chat(query: message):
+
