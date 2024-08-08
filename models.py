@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime, timedelta
-
+from typing import List, Optional
 class User(BaseModel):
     id: str = Field(default=None)
     username: str = Field(...)
@@ -19,3 +19,7 @@ class ChatSchema(BaseModel):
             
         }
         }
+
+class ChatHistory(BaseModel):
+    username: str
+    messages: List[dict] = Field(default_factory=list)
