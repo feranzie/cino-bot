@@ -15,6 +15,9 @@ from langchain_core.runnables import RunnableBranch
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from typing import Dict
 from langchain_community.chat_message_histories import RedisChatMessageHistory
+from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
+
+
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from langchain.cache import InMemoryCache
@@ -154,13 +157,25 @@ chain=conversational_retrieval_chain | question_answering_prompt |  chat
 async def chat(message:ChatSchema):
     try:
         with_message_history = RunnableWithMessageHistory(
-                chain,
-                lambda session_id: RedisChatMessageHistory(
-                    session_id, url="redis://localhost:6379",ttl=300
-                ),
-                input_messages_key="question",
-                history_messages_key="history",
-            )
+        chain,
+        lambda session_id: MongoDBChatMessageHistory(
+        session_id=session_id,
+        connection_string="mongodb://localhost:27017/",
+        database_name="projects",
+        collection_name="bino",
+        ),
+        input_messages_key="question",
+        history_messages_key="history",
+        )
+  
+        # with_message_history = RunnableWithMessageHistory(
+        #         chain,
+        #         lambda session_id: RedisChatMessageHistory(
+        #             session_id, url="redis://localhost:6379",ttl=300
+        #         ),
+        #         input_messages_key="question",
+        #         history_messages_key="history",
+        #     )
         
         ss_id="bets"
         response = with_message_history.invoke(
