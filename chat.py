@@ -17,6 +17,7 @@ from typing import Dict
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_mongodb.chat_message_histories import MongoDBChatMessageHistory
 
+from models import User
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
@@ -32,9 +33,9 @@ from fastapi import APIRouter
 cache_instance=InMemoryCache()
 set_llm_cache(cache_instance)
 config = Config(RepositoryEnv("C:/Users/DELL/Desktop/llm-experiments/.env"))
+
 COHERE_API_KEY = config('COHERE_API_KEY')
 os.environ["COHERE_API_KEY"] = config('COHERE_API_KEY')
-
 os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"] = config('LANGCHAIN_API_KEY')  # Update with your API key
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
@@ -135,11 +136,6 @@ query_transforming_retriever_chain = RunnableBranch(
 ).with_config(run_name="chat_retriever_chain")
 
 
-
-
-
-
-
 conversational_retrieval_chain = RunnablePassthrough.assign(
     context=query_transforming_retriever_chain,
 ).assign(
@@ -153,16 +149,16 @@ chain=conversational_retrieval_chain | question_answering_prompt |  chat
 
 
 
-@router.post("/chat")
-async def chat(message:ChatSchema):
+@router.post("/chat/{session_id}")
+async def chat(session_id:str, message:ChatSchema):
     try:
         with_message_history = RunnableWithMessageHistory(
         chain,
         lambda session_id: MongoDBChatMessageHistory(
         session_id=session_id,
         connection_string="mongodb://localhost:27017/",
-        database_name="projects",
-        collection_name="bino",
+        database_name="fastapi_mongo",
+        collection_name="chat_histories",
         ),
         input_messages_key="question",
         history_messages_key="history",
@@ -177,10 +173,9 @@ async def chat(message:ChatSchema):
         #         history_messages_key="history",
         #     )
         
-        ss_id="bets"
         response = with_message_history.invoke(
                 {"question": f"{message.query}"},
-                config={"configurable": {"session_id": ss_id}}
+                config={"configurable": {"session_id": session_id}}
                 )
         return JSONResponse(content={"bot":f" {response}"},
                                     status_code= 200
@@ -190,3 +185,5 @@ async def chat(message:ChatSchema):
             raise HTTPException(
                     status_code=400,detail=f"an error occoured while starting the assistant {e}"
                 )
+
+
