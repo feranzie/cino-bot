@@ -35,6 +35,7 @@ set_llm_cache(cache_instance)
 config = Config(RepositoryEnv("C:/Users/DELL/Desktop/llm-experiments/.env"))
 
 COHERE_API_KEY = config('COHERE_API_KEY')
+MONGO_URI = config('MONGO_URI')
 os.environ["COHERE_API_KEY"] = config('COHERE_API_KEY')
 os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"] = config('LANGCHAIN_API_KEY')  # Update with your API key
@@ -156,7 +157,7 @@ async def chat(session_id:str, message:ChatSchema):
         chain,
         lambda session_id: MongoDBChatMessageHistory(
         session_id=session_id,
-        connection_string="mongodb://localhost:27017/",
+        connection_string="MONGO_URI",
         database_name="fastapi_mongo",
         collection_name="chat_histories",
         ),
