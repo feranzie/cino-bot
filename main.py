@@ -11,6 +11,7 @@ from decouple import Config,RepositoryEnv
 import os
 from models import User
 import chat
+import uuid
 config = Config(RepositoryEnv(".env"))
 MONGO_URI = config('MONGO_URI')
 
@@ -117,6 +118,25 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 @app.get("/users/me/", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+
+@app.get("/chat_histories")
+async def list_chat_histories(current_user: User = Depends(get_current_user)):
+    chat_histories = await db.chat_histories.find({"username": current_user.username}).to_list(length=None)
+    return [{"conversation_id": chat_history["conversation_id"], "messages": chat_history["messages"]} for chat_history in chat_histories]
+
+
+@app.post("/new_conversation")
+async def new_conversation(current_user: User = Depends(get_current_user)):
+    # Generate a unique conversation ID
+    conversation_id = str(uuid.uuid4())
+    
+    # Create a new chat message history in MongoDB
+    await db.chat_histories.insert_one({"username": current_user.username, "conversation_id": conversation_id, "messages": []})
+    
+    return {"conversation_id": conversation_id}
+
 
 #app.include_router(chat.router)
 app.include_router(

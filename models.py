@@ -22,4 +22,5 @@ class ChatSchema(BaseModel):
 
 class ChatHistory(BaseModel):
     username: str
+    conversation_id: str
     messages: List[dict] = Field(default_factory=list)

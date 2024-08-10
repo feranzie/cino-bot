@@ -165,14 +165,6 @@ async def chat(session_id:str, message:ChatSchema):
         history_messages_key="history",
         )
   
-        # with_message_history = RunnableWithMessageHistory(
-        #         chain,
-        #         lambda session_id: RedisChatMessageHistory(
-        #             session_id, url="redis://localhost:6379",ttl=300
-        #         ),
-        #         input_messages_key="question",
-        #         history_messages_key="history",
-        #     )
         
         response = with_message_history.invoke(
                 {"question": f"{message.query}"},
